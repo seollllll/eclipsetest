@@ -31,8 +31,8 @@ public class FileUtils {
 		if(directory.exists() == false) {
 			//서버 루트 경로에 upload 폴더 만들기
 			directory.mkdir();
-		}
-		
+		}    
+		   
 		//첨부파일 목록 꺼내오기
 		Iterator<String> iterator = multipartServletRequest.getFileNames();
 		
