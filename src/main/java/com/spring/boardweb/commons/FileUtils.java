@@ -27,7 +27,7 @@ public class FileUtils {
 		String attachPath = "/upload/";
 		
 		File directory = new File(rootPath + attachPath);
-		
+		    
 		if(directory.exists() == false) {
 			//서버 루트 경로에 upload 폴더 만들기
 			directory.mkdir();
