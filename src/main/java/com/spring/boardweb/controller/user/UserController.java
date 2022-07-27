@@ -1,0 +1,94 @@
+package com.spring.boardweb.controller.user;
+
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.spring.boardweb.entity.User;
+import com.spring.boardweb.service.user.UserService;
+
+@RestController
+@RequestMapping("/user")
+public class UserController {
+	
+	@Autowired
+	UserService userService; 
+	// UserService.java에 있는 내용들을 사용하겠다.
+	
+	@Autowired
+	PasswordEncoder passwordEncoder;
+
+	@GetMapping("/join")
+	// @RestController에서 화면을 반환하려면 ModelAndView 객체를 사용하여 화면을 반환한다.
+	public ModelAndView joinView() {
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("user/join.html");
+
+		return mv;
+	}
+
+	@GetMapping("/login") // 주소창에 get은 내용들이 뜬다.
+	public ModelAndView loginView() {
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("user/login.html");
+
+		return mv;
+	}
+
+	@PostMapping("/join") // 주소창에 post는 내용들이 안뜬다.
+	public ModelAndView join(User user) {
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("user/login.html"); // 서브밋누르면 login페이지로 이동
+		
+		String pw = user.getUserPw();
+		user.setUserPw(passwordEncoder.encode(pw));
+		
+		// 회원가입처리 (user의 앤티티객체를 넘겨줌)
+		userService.join(user); // join이라는 메소드안에 회원가입할때 내용들을 db로 저장.
+
+		return mv;
+
+	}
+
+	@PostMapping("/idCheck")
+	public String idCheck(User user) {
+		User idCheck = userService.idCheck(user.getUserId());
+
+		if (idCheck == null) {
+			return "idOk";
+		} else {
+			return "idFail";
+		}
+	}
+
+	@PostMapping("/login")
+	public String login(User user, HttpSession session) {
+		User loginUser = userService.idCheck(user.getUserId());
+		if (loginUser == null) {
+			return "idFail";
+		} else {
+			if (!loginUser.getUserPw().equals(user.getUserPw())) {
+				return "pwFail";
+			} else {
+				session.setAttribute("loginUser", loginUser);
+				return "loginSuccess";
+			}
+		}
+
+	}
+
+	@GetMapping("/logout")
+	public ModelAndView logout(HttpSession session) {
+		session.invalidate();
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("user/login.html");
+		return mv;
+	}
+
+}
